@@ -1,0 +1,73 @@
+// File: FactoryTest.java
+
+// 1. Document Interface
+interface Document {
+    void open();
+    void save();
+}
+
+// 2. Concrete Document Classes
+class WordDocument implements Document {
+    @Override
+    public void open() { System.out.println("Opening Word Document (.docx)..."); }
+    @Override
+    public void save() { System.out.println("Saving Word Document (.docx)..."); }
+}
+
+class PdfDocument implements Document {
+    @Override
+    public void open() { System.out.println("Opening PDF Document (.pdf)..."); }
+    @Override
+    public void save() { System.out.println("Saving PDF Document (.pdf)..."); }
+}
+
+class ExcelDocument implements Document {
+    @Override
+    public void open() { System.out.println("Opening Excel Spreadsheet (.xlsx)..."); }
+    @Override
+    public void save() { System.out.println("Saving Excel Spreadsheet (.xlsx)..."); }
+}
+
+// 3. Abstract Creator (Factory)
+abstract class DocumentFactory {
+    public abstract Document createDocument();
+
+    public void newDocument() {
+        Document doc = createDocument();
+        doc.open();
+        doc.save();
+    }
+}
+
+// 4. Concrete Factories
+class WordDocumentFactory extends DocumentFactory {
+    @Override
+    public Document createDocument() { return new WordDocument(); }
+}
+
+class PdfDocumentFactory extends DocumentFactory {
+    @Override
+    public Document createDocument() { return new PdfDocument(); }
+}
+
+class ExcelDocumentFactory extends DocumentFactory {
+    @Override
+    public Document createDocument() { return new ExcelDocument(); }
+}
+
+// 5. Main Test Class
+public class FactoryTest {
+    public static void main(String[] args) {
+        System.out.println("--- Creating Word Document ---");
+        DocumentFactory wordFactory = new WordDocumentFactory();
+        wordFactory.newDocument();
+
+        System.out.println("\n--- Creating PDF Document ---");
+        DocumentFactory pdfFactory = new PdfDocumentFactory();
+        pdfFactory.newDocument();
+
+        System.out.println("\n--- Creating Excel Document ---");
+        DocumentFactory excelFactory = new ExcelDocumentFactory();
+        excelFactory.newDocument();
+    }
+}

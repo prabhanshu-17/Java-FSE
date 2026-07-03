@@ -1,0 +1,131 @@
+-- ============================================================================
+-- Scenario 1: The bank needs to process monthly interest for all savings accounts.
+-- Question: Write a stored procedure ProcessMonthlyInterest that calculates 
+--           and updates the balance of all savings accounts by applying an 
+--           interest rate of 1% to the current balance.
+-- ============================================================================
+
+CREATE OR REPLACE PROCEDURE ProcessMonthlyInterest IS
+    v_rows_updated NUMBER := 0;
+BEGIN
+    -- Apply 1% interest to all savings accounts
+    UPDATE Accounts
+    SET Balance = Balance * 1.01
+    WHERE AccountType = 'SAVINGS';
+    
+    -- Capture the number of updated accounts
+    v_rows_updated := SQL%ROWCOUNT;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Success: Applied 1% monthly interest to ' || v_rows_updated || ' savings account(s).');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error processing monthly interest: ' || SQLERRM);
+END ProcessMonthlyInterest;
+/
+
+-- ============================================================================
+-- Scenario 2: The bank wants to implement a bonus scheme for employees based 
+--             on their performance.
+-- Question: Write a stored procedure UpdateEmployeeBonus that updates the 
+--           salary of employees in a given department by adding a bonus 
+--           percentage passed as a parameter.
+-- ============================================================================
+
+CREATE OR REPLACE PROCEDURE UpdateEmployeeBonus (
+    p_department_id IN NUMBER,
+    p_bonus_percentage IN NUMBER
+) IS
+    v_rows_updated NUMBER := 0;
+BEGIN
+    -- Validate that the percentage is non-negative
+    IF p_bonus_percentage < 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Bonus percentage cannot be negative.');
+    END IF;
+
+    -- Update salaries by adding the calculated percentage bonus
+    UPDATE Employees
+    SET Salary = Salary + (Salary * (p_bonus_percentage / 100))
+    WHERE DepartmentID = p_department_id;
+    
+    v_rows_updated := SQL%ROWCOUNT;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Success: Applied a ' || p_bonus_percentage || '% bonus to ' || v_rows_updated || ' employee(s) in Department ID ' || p_department_id || '.');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error updating employee bonuses: ' || SQLERRM);
+END UpdateEmployeeBonus;
+/
+
+
+-- ============================================================================
+-- Scenario 3: Customers should be able to transfer funds between their accounts.
+-- Question: Write a stored procedure TransferFunds that transfers a specified 
+--           amount from one account to another, checking that the source 
+--           account has sufficient balance before making the transfer.
+-- ============================================================================
+
+CREATE OR REPLACE PROCEDURE TransferFunds (
+    p_from_account_id IN NUMBER,
+    p_to_account_id IN NUMBER,
+    p_amount IN NUMBER
+) IS
+    v_source_balance NUMBER;
+    v_dest_exists    NUMBER;
+    e_insufficient_funds EXCEPTION;
+    e_invalid_amount     EXCEPTION;
+BEGIN
+    -- 1. Validate that the transfer amount is positive
+    IF p_amount <= 0 THEN
+        RAISE e_invalid_amount;
+    END IF;
+
+    -- 2. Lock the source account row and retrieve its current balance
+    SELECT Balance INTO v_source_balance
+    FROM Accounts
+    WHERE AccountID = p_from_account_id
+    FOR UPDATE;
+
+    -- 3. Verify sufficient funds exist
+    IF v_source_balance < p_amount THEN
+        RAISE e_insufficient_funds;
+    END IF;
+
+    -- 4. Verify destination account exists and lock it
+    SELECT 1 INTO v_dest_exists 
+    FROM Accounts 
+    WHERE AccountID = p_to_account_id 
+    FOR UPDATE;
+
+    -- 5. Deduct funds from the source account
+    UPDATE Accounts
+    SET Balance = Balance - p_amount
+    WHERE AccountID = p_from_account_id;
+
+    -- 6. Credit funds to the destination account
+    UPDATE Accounts
+    SET Balance = Balance + p_amount
+    WHERE AccountID = p_to_account_id;
+
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Success: Transferred $' || p_amount || ' from Account ID ' || p_from_account_id || ' to Account ID ' || p_to_account_id || '.');
+
+EXCEPTION
+    WHEN e_invalid_amount THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Transfer Aborted: Amount must be greater than zero.');
+    WHEN e_insufficient_funds THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Transfer Aborted: Insufficient funds in Account ID ' || p_from_account_id || '.');
+    WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Transfer Aborted: One or both specified Account IDs do not exist.');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Transfer Aborted due to unexpected error: ' || SQLERRM);
+END TransferFunds;
+/
+

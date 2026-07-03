@@ -1,0 +1,60 @@
+
+
+package com.example.project;
+
+import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+
+// 1. External Dependency Interface
+interface ExternalApi {
+    String getData();
+    void sendData(String payload);
+}
+
+// 2. Service Class under test
+class MyService {
+    private final ExternalApi externalApi;
+
+    public MyService(ExternalApi externalApi) {
+        this.externalApi = externalApi;
+    }
+
+    public void fetchData() {
+        externalApi.getData();
+    }
+
+    public void processAndSend(String data) {
+        externalApi.sendData(data);
+    }
+}
+
+// 3. Main Test Class demonstrating Interaction Verification
+public class VerifyingInteractionsTest {
+
+    @Test
+    public void testVerifyInteraction() {
+        // Step 1: Create a mock object
+        ExternalApi mockApi = mock(ExternalApi.class);
+        MyService service = new MyService(mockApi);
+
+        // Step 2: Call the method on our service
+        service.fetchData();
+
+        // Step 3: Verify that externalApi.getData() was called exactly once
+        verify(mockApi, times(1)).getData();
+    }
+
+    @Test
+    public void testVerifyInteractionWithSpecificArguments() {
+        // Step 1: Create a mock object
+        ExternalApi mockApi = mock(ExternalApi.class);
+        MyService service = new MyService(mockApi);
+
+        // Step 2: Call the method with specific arguments
+        String payload = "Important Payload";
+        service.processAndSend(payload);
+
+        // Step 3: Verify the mock was called with the exact expected argument
+        verify(mockApi).sendData("Important Payload");
+    }
+}

@@ -1,0 +1,70 @@
+// File: FinancialForecaster.java
+import java.util.HashMap;
+import java.util.Map;
+
+public class FinancialForecaster {
+
+    // 1. Standard Recursive Forecasting (Constant Growth Rate)
+    public static double predictFutureValue(double presentValue, double growthRate, int periods) {
+        // Base Case: At period 0, the future value is simply the present value
+        if (periods <= 0) {
+            return presentValue;
+        }
+        // Recursive Step: Calculate previous period's value and apply current period growth
+        return predictFutureValue(presentValue, growthRate, periods - 1) * (1 + growthRate);
+    }
+
+    // 2. Forecasting Based on Historical Variable Growth Rates
+    public static double predictWithVariableRates(double presentValue, double[] historicalRates, int periodsAhead) {
+        if (periodsAhead <= 0) {
+            return presentValue;
+        }
+        
+        // Calculate average historical growth rate to project forward
+        double sumRates = 0;
+        for (double rate : historicalRates) {
+            sumRates += rate;
+        }
+        double avgRate = sumRates / historicalRates.length;
+
+        // Recursive projection using the projected average rate
+        return predictWithVariableRates(presentValue, historicalRates, periodsAhead - 1) * (1 + avgRate);
+    }
+
+    // 3. Optimized Recursive Forecasting using Memoization
+    public static double predictMemoized(double presentValue, double growthRate, int periods, Map<Integer, Double> memo) {
+        if (periods <= 0) {
+            return presentValue;
+        }
+        
+        // Return cached result if already calculated
+        if (memo.containsKey(periods)) {
+            return memo.get(periods);
+        }
+
+        // Compute, store in cache, and return
+        double result = predictMemoized(presentValue, growthRate, periods - 1, memo) * (1 + growthRate);
+        memo.put(periods, result);
+        return result;
+    }
+
+    public static void main(String[] args) {
+        double initialCapital = 10000.0; // $10,000
+        double annualRate = 0.07;        // 7% growth rate
+        int years = 10;                  // 10-year forecast
+
+        System.out.println("--- 1. Standard Recursive Forecast ---");
+        double futureValue = predictFutureValue(initialCapital, annualRate, years);
+        System.out.printf("Projected Value after %d years: $%,.2f%n", years, futureValue);
+
+        System.out.println("\n--- 2. Variable Historical Rates Forecast ---");
+        double[] pastRates = {0.05, 0.08, 0.06, 0.09, 0.07}; // Past 5 years of performance
+        double varFutureValue = predictWithVariableRates(initialCapital, pastRates, years);
+        System.out.printf("Projected Value based on past trends: $%,.2f%n", varFutureValue);
+
+        System.out.println("\n--- 3. Optimized Memoized Forecast ---");
+        Map<Integer, Double> memoCache = new HashMap<>();
+        double memoValue = predictMemoized(initialCapital, annualRate, years, memoCache);
+        System.out.printf("Optimized Projected Value: $%,.2f%n", memoValue);
+    }
+}

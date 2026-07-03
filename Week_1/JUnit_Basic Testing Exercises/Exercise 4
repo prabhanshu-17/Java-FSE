@@ -1,0 +1,73 @@
+/* ============================================================================
+ Exercise 4: Arrange-Act-Assert (AAA) Pattern, Test Fixtures, Setup and Teardown Methods in JUnit
+ Scenario: You need to organize your tests using the Arrange-Act-Assert (AAA) pattern 
+           and use setup and teardown methods.
+ Steps:
+ 1. Write tests using the AAA pattern.
+ 2. Use @Before and @After annotations for setup and teardown methods.
+============================================================================ */
+
+package com.example.project;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+// 1. Target Class to be tested (non-public so it can reside in the same file)
+class Counter {
+    private int count = 0;
+
+    public void increment() { count++; }
+    public void add(int amount) { count += amount; }
+    public void reset() { count = 0; }
+    public int getCount() { return count; }
+}
+
+// 2. Main JUnit Test Class demonstrating Fixtures and the AAA Pattern
+public class CounterAAATest {
+
+    private Counter counter;
+
+    // @Before executes automatically BEFORE each test method runs
+    @Before
+    public void setUp() {
+        System.out.println("Running @Before setup fixture...");
+        counter = new Counter(); // Initialize a fresh instance for every test
+    }
+
+    // @After executes automatically AFTER each test method finishes
+    @After
+    public void tearDown() {
+        System.out.println("Running @After teardown fixture...\n");
+        counter = null; // Clean up resources
+    }
+
+    @Test
+    public void testIncrementUsingAAA() {
+        // --- ARRANGE ---
+        // Set up any required preconditions (counter is already initialized to 0 in @Before)
+        int expectedCount = 1;
+
+        // --- ACT ---
+        // Execute the targeted behavior
+        counter.increment();
+
+        // --- ASSERT ---
+        // Verify the outcome matches expectations
+        assertEquals("Counter should increment by 1", expectedCount, counter.getCount());
+    }
+
+    @Test
+    public void testAddCustomAmountUsingAAA() {
+        // --- ARRANGE ---
+        int amountToAdd = 15;
+        int expectedCount = 15;
+
+        // --- ACT ---
+        counter.add(amountToAdd);
+
+        // --- ASSERT ---
+        assertEquals("Counter should equal the added amount", expectedCount, counter.getCount());
+    }
+}

@@ -1,0 +1,39 @@
+/* ============================================================================
+ Exercise 3: Assertions in JUnit
+ Scenario: You need to use different assertions in JUnit to validate your test results.
+ Steps:
+ 1. Write tests using various JUnit assertions.
+============================================================================ */
+
+package com.example.project;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AssertionsTest {
+
+    @Test
+    public void testAssertions() {
+        // Assert equals: verifies that two primitives/objects are equal
+        assertEquals(5, 2 + 3);
+
+        // Assert true: verifies that a boolean condition is true
+        assertTrue(5 > 3);
+
+        // Assert false: verifies that a boolean condition is false
+        assertFalse(5 < 3);
+
+        // Assert null: verifies that an object reference is null
+        assertNull(null);
+
+        // Assert not null: verifies that an object reference is not null
+        assertNotNull(new Object());
+        
+        // Assert array equals: verifies that two arrays contain the same elements
+        assertArrayEquals(new int[]{1, 2, 3}, new int[]{1, 2, 3});
+        
+        // Assert same: verifies that two references point to the exact same object in memory
+        String str = "hello";
+        assertSame(str, str);
+    }
+}

@@ -1,0 +1,45 @@
+
+
+package com.example.project;
+
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+
+// 1. External Dependency Interface (non-public so it can reside in the same file)
+interface ExternalApi {
+    String getData();
+}
+
+// 2. Service Class under test that depends on ExternalApi
+class MyService {
+    private final ExternalApi externalApi;
+
+    public MyService(ExternalApi externalApi) {
+        this.externalApi = externalApi;
+    }
+
+    public String fetchData() {
+        return externalApi.getData();
+    }
+}
+
+// 3. Main Test Class demonstrating Mocking and Stubbing
+public class MockingStubbingTest {
+
+    @Test
+    public void testExternalApi() {
+        // Step 1: Create a mock object for the external API dependency
+        ExternalApi mockApi = mock(ExternalApi.class);
+
+        // Step 2: Stub the method to return a predefined value when called
+        when(mockApi.getData()).thenReturn("Mock Data");
+
+        // Step 3: Inject the mock into the service and execute the method under test
+        MyService service = new MyService(mockApi);
+        String result = service.fetchData();
+
+        // Assert: Verify that the service correctly processed our stubbed return value
+        assertEquals("Mock Data", result, "The service should return the stubbed mock data.");
+    }
+}
