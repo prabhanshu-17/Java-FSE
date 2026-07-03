@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 1. Define the repository bean -->
+    <bean id="bookRepository" class="com.library.BookRepository" />
+
+    <!-- 2. Define the service bean and inject the repository using setter injection -->
+    <bean id="bookService" class="com.library.BookService">
+        <!-- 'name' points to setBookRepository(), 'ref' points to the id above -->
+        <property name="bookRepository" ref="bookRepository" />
+    </bean>
+
+</beans>

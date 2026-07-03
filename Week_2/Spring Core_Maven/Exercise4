@@ -1,0 +1,50 @@
+
+
+package com.library;
+
+// Importing classes from the newly configured Spring dependencies
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.web.servlet.DispatcherServlet;
+
+// Dummy library class inside the same file to simulate project structure
+class LibraryInfo {
+    private final String appName = "Library Management System";
+    private final String javaVersion = System.getProperty("java.version");
+
+    public void printDetails() {
+        System.out.println("Application: " + appName);
+        System.out.println("Running on Java Version: " + javaVersion);
+    }
+}
+
+// Main Runner Class
+public class MavenSetupTest {
+    public static void main(String[] args) {
+        System.out.println("--- 1. Testing Project & Java 1.8 Configuration ---");
+        LibraryInfo info = new LibraryInfo();
+        info.printDetails();
+
+        System.out.println("\n--- 2. Verifying Spring Dependencies from pom.xml ---");
+
+        try {
+            // Check Spring Context Dependency
+            ApplicationContext context = new GenericApplicationContext();
+            System.out.println("[SUCCESS] Spring Context Loaded: " + context.getClass().getSimpleName());
+
+            // Check Spring AOP Dependency
+            ProxyFactory proxyFactory = new ProxyFactory();
+            System.out.println("[SUCCESS] Spring AOP Loaded: " + proxyFactory.getClass().getSimpleName());
+
+            // Check Spring WebMVC Dependency
+            DispatcherServlet dispatcherServlet = new DispatcherServlet();
+            System.out.println("[SUCCESS] Spring WebMVC Loaded: " + dispatcherServlet.getClass().getSimpleName());
+
+            System.out.println("\nAll dependencies and configurations are working perfectly!");
+        } catch (NoClassDefFoundError | Exception e) {
+            System.err.println("[ERROR] A dependency failed to load. Ensure Maven reloads your pom.xml.");
+            e.printStackTrace();
+        }
+    }
+}

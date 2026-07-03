@@ -1,0 +1,62 @@
+/* ============================================================================
+ Exercise 1 & 2: Configuring a Basic Spring Application & Dependency Injection
+ Steps:
+ 1. Define BookRepository and BookService classes.
+ 2. Ensure BookService has a setter method for BookRepository DI.
+ 3. Load the Spring context and test the configuration.
+============================================================================ */
+
+package com.library;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+// 1. Repository Class (Non-public so it can reside in this single file)
+class BookRepository {
+    public BookRepository() {
+        System.out.println("BookRepository initialized by Spring IoC Container.");
+    }
+
+    public void saveBook(String bookTitle) {
+        System.out.println("[Repository] Saving book to database: '" + bookTitle + "'");
+    }
+}
+
+// 2. Service Class with Setter Injection (Non-public so it can reside in this single file)
+class BookService {
+    private BookRepository bookRepository;
+
+    public BookService() {
+        System.out.println("BookService initialized by Spring IoC Container.");
+    }
+
+    // Setter method required for Spring XML Property/Setter Injection
+    public void setBookRepository(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+        System.out.println("BookRepository dependency injected into BookService.");
+    }
+
+    public void addBook(String bookTitle) {
+        System.out.println("[Service] Processing new book entry...");
+        bookRepository.saveBook(bookTitle);
+    }
+}
+
+// 3. Main Application Class
+public class LibraryManagementApplication {
+    public static void main(String[] args) {
+        System.out.println("--- Loading Spring Application Context ---");
+        
+        // Load XML configuration from src/main/resources/applicationContext.xml
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        System.out.println("\n--- Retrieving BookService Bean ---");
+        BookService bookService = (BookService) context.getBean("bookService");
+
+        System.out.println("\n--- Executing Business Method ---");
+        bookService.addBook("Spring Framework in Action");
+        
+        // Gracefully close the context
+        ((ClassPathXmlApplicationContext) context).close();
+    }
+}
